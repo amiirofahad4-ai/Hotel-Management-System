@@ -31,13 +31,13 @@ export function DashboardContent() {
       title: "Total Rooms",
       value: "48",
       icon: DoorOpen,
-      color: "bg-blue-500/20 text-blue-500",
+      color: "bg-purple-500/20 text-purple-500",
     },
     {
       title: "Occupied Rooms",
       value: "32",
       icon: Building2,
-      color: "bg-green-500/20 text-green-500",
+      color: "bg-purple-500/20 text-purple-500",
     },
     {
       title: "Active Customers",
@@ -49,7 +49,7 @@ export function DashboardContent() {
       title: "Revenue Today",
       value: "$4,250",
       icon: TrendingUp,
-      color: "bg-orange-500/20 text-orange-500",
+      color: "bg-purple-500/20 text-purple-500",
     },
   ])
 

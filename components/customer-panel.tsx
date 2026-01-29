@@ -30,6 +30,7 @@ export function CustomerPanel() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [formData, setFormData] = useState<CustomerFormData>({
     name: "",
     phone: "",
@@ -74,24 +75,45 @@ export function CustomerPanel() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await fetch('/api/customers', {
-        method: 'POST',
+      const isEditing = !!editingCustomer
+      const url = isEditing ? `/api/customers?id=${editingCustomer._id}` : '/api/customers'
+      const method = isEditing ? 'PUT' : 'POST'
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       })
 
-      if (!response.ok) throw new Error('Failed to create customer')
+      if (!response.ok) throw new Error(`Failed to ${isEditing ? 'update' : 'create'} customer`)
 
-      const newCustomer = await response.json()
-      setCustomers([...customers, newCustomer])
+      const updatedCustomer = await response.json()
+      if (isEditing) {
+        setCustomers(customers.map(c => c._id === editingCustomer._id ? updatedCustomer : c))
+      } else {
+        setCustomers([...customers, updatedCustomer])
+      }
       setFormData({ name: "", phone: "", email: "", address: "", idNumber: "" })
+      setEditingCustomer(null)
       setIsDialogOpen(false)
     } catch (err: any) {
-      console.error('Error creating customer:', err)
-      alert(err.message || 'Error creating customer')
+      console.error(`Error ${editingCustomer ? 'updating' : 'creating'} customer:`, err)
+      alert(err.message || `Error ${editingCustomer ? 'updating' : 'creating'} customer`)
     }
+  }
+
+  const handleEdit = (customer: Customer) => {
+    setEditingCustomer(customer)
+    setFormData({
+      name: customer.name,
+      phone: customer.phone,
+      email: customer.email,
+      address: customer.address,
+      idNumber: customer.idNumber
+    })
+    setIsDialogOpen(true)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,7 +137,7 @@ export function CustomerPanel() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Add New Customer</DialogTitle>
+              <DialogTitle>{editingCustomer ? 'Edit Customer' : 'Add New Customer'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-4 items-center gap-4">
@@ -185,10 +207,10 @@ export function CustomerPanel() {
                 />
               </div>
               <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => { setIsDialogOpen(false); setEditingCustomer(null); setFormData({ name: "", phone: "", email: "", address: "", idNumber: "" }); }}>
                   Cancel
                 </Button>
-                <Button type="submit">Add Customer</Button>
+                <Button type="submit">{editingCustomer ? 'Update Customer' : 'Add Customer'}</Button>
               </div>
             </form>
           </DialogContent>
@@ -236,7 +258,7 @@ export function CustomerPanel() {
                     <td className="px-6 py-4 text-muted-foreground">{customer.address}</td>
                     <td className="px-6 py-4 text-muted-foreground">{customer.idNumber}</td>
                     <td className="px-6 py-4 text-right space-x-2">
-                      <button className="p-2 hover:bg-muted rounded-lg transition-colors inline-block">
+                      <button onClick={() => handleEdit(customer)} className="p-2 hover:bg-muted rounded-lg transition-colors inline-block">
                         <Edit2 className="w-4 h-4 text-muted-foreground hover:text-foreground" />
                       </button>
                       <button

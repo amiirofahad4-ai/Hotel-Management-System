@@ -332,7 +332,7 @@ export function ServicesPanel() {
                   <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
                   <Badge variant="outline" className="mt-2">{service.category}</Badge>
                 </div>
-                <button className="p-2 hover:bg-destructive/10 rounded-lg transition-colors">
+                <button onClick={() => handleDelete(service._id)} className="p-2 hover:bg-destructive/10 rounded-lg transition-colors">
                   <Trash2 className="w-4 h-4 text-destructive" />
                 </button>
               </div>
